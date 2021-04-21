@@ -5,7 +5,7 @@ from sklearn.preprocessing import StandardScaler
 np.random.seed(0)
 pd.set_option('display.max_columns', 500)
 
-#####################size is 1,13###################
+#####################size is 1x13#####################
 heart=pd.read_csv('heart_disease_dataset.csv',sep=';')
 
 #data prep
@@ -13,22 +13,13 @@ target=heart['target']
 X=heart.drop('target',axis=1)
 X=np.array(X)
 X.reshape((1,-1))
-Y=np.array(target)
-Y=Y.reshape((-1,1))
-stan=StandardScaler()
-standart=stan.fit_transform(X)
-print(standart)
+Y=np.array(target).reshape((-1,1))
+standart=StandardScaler().fit_transform(X)# transform to Z distrubution
 
 
 x_train,x_test,y_train,y_test=train_test_split(standart,Y,random_state=12,test_size=0.5)
 
 
-
-def softmax(x):
-    temp=np.exp(x)
-    return temp/np.sum(np.exp(temp))
-
-input_is=X/100
 
 def sigmoid(x):
     return 1 / (1 + np.exp(-x))
@@ -38,8 +29,8 @@ def sigmoid_derivative(x):
     return x * (1.0 - x)
 
 iterations=200
-weight_0_1=(np.random.random((X.shape[1],4)))-0.5
-weight_1_2=(np.random.random((4,6)))-0.5
+weight_0_1=np.random.random((X.shape[1],4))-0.5
+weight_1_2=np.random.random((4,6))-0.5
 weight_2_3=np.random.random(((6,1)))-0.5
 
 
@@ -56,10 +47,12 @@ for iterat in range(100):
         error=np.sum((layer_out-target_is)**2)
         all_error+=error
 
+        ### BACK PROPOGATION ###
         layer_out_delta=(target_is-layer_out)*sigmoid_derivative(layer_out)
         layer_2_delta=layer_out_delta.dot(weight_2_3.T)*sigmoid_derivative(layer_2)
         layer_1_deta=layer_2_delta.dot(weight_1_2.T)*sigmoid_derivative(layer_1)
-
+        
+        ### MAKE WEIGHT CORRECTION ###
         weight_2_3+=layer_2.T.dot(layer_out_delta)
         weight_1_2+=layer_1.T.dot(layer_2_delta)
         weight_0_1+=layer_0.T.dot(layer_1_deta)
@@ -67,7 +60,7 @@ for iterat in range(100):
         print(target_is,'test target')
         print(layer_out,'test predict')
         print(error,'ERROR')
-
+    ### CHECK ###
     layer_0 = x_test[i:i + 1]
     target_is = y_test[i:1 + i]
     layer_1 = sigmoid(np.dot(layer_0, weight_0_1))
@@ -78,5 +71,5 @@ for iterat in range(100):
     print(all_error,'ALL ERROR')
 
 
-#7426
+
 
